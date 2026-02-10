@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.acmicpc.net)",
+      "Bash(npx vitest:*)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 status)",
+      "Bash(gh repo view:*)",
+      "Bash(git init:*)",
+      "Bash(git branch:*)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 remote add origin:*)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 add -A)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 status --short)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 reset HEAD .env)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 rm --cached .env)"
+    ]
+  }
+}
