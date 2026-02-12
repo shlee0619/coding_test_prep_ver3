@@ -139,6 +139,7 @@ type RealtimeRecommendationOptions = {
   levelMin?: number;
   levelMax?: number;
   tags?: string[];
+  excludeSolved?: boolean;
 };
 
 async function buildRealtimeRecommendations(
@@ -153,6 +154,7 @@ async function buildRealtimeRecommendations(
     db.getUserTagStats(userId),
   ]);
 
+  const shouldExcludeSolved = options.excludeSolved ?? true;
   const solvedIds = new Set<number>(solvedStatuses.map((s) => s.problemId));
   const usedIds = new Set<number>();
   const tagUsage = new Map<string, number>();
@@ -187,7 +189,8 @@ async function buildRealtimeRecommendations(
 
   const pushCandidate = (problem: solvedac.SolvedAcProblem, primaryTag: string, categoryHint?: RecommendationCategory) => {
     if (items.length >= options.limit) return;
-    if (solvedIds.has(problem.problemId) || usedIds.has(problem.problemId)) return;
+    if (usedIds.has(problem.problemId)) return;
+    if (shouldExcludeSolved && solvedIds.has(problem.problemId)) return;
 
     const tags = problem.tags.map((t) => solvedac.getTagDisplayName(t));
     const weakScore = weakScoreByTag.get(primaryTag) ?? 0.3;
@@ -518,11 +521,13 @@ export const appRouter = router({
         levelMin: z.number().optional(),
         levelMax: z.number().optional(),
         tags: z.array(z.string()).optional(),
+        excludeSolved: z.boolean().optional(),
         realtime: z.boolean().optional(),
         limit: z.number().min(1).max(MAX_RECOMMENDATION_LIMIT).optional(),
       }).optional())
       .query(async ({ ctx, input }) => {
         const realtime = input?.realtime ?? true;
+        const excludeSolved = input?.excludeSolved ?? true;
         const limit = clampRecommendationLimit(input?.limit);
         const rec = await db.getLatestRecommendations(ctx.user.id);
         let items: RecommendationItem[] = [];
@@ -534,6 +539,7 @@ export const appRouter = router({
             levelMin: input?.levelMin,
             levelMax: input?.levelMax,
             tags: input?.tags,
+            excludeSolved,
           });
         } else {
           items = (rec?.items as RecommendationItem[] | undefined) ?? [];
@@ -568,6 +574,12 @@ export const appRouter = router({
           // 태그 필터
           if (input?.tags && input.tags.length > 0) {
             items = items.filter((i) => i.tags?.some((t) => input.tags!.includes(t)));
+          }
+
+          if (excludeSolved && items.length > 0) {
+            const solvedStatuses = await db.getUserSolvedProblems(ctx.user.id);
+            const solvedIds = new Set<number>(solvedStatuses.map((status) => status.problemId));
+            items = items.filter((item) => !solvedIds.has(item.problemId));
           }
 
           items = items.slice(0, limit);

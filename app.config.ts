@@ -6,6 +6,29 @@ const APP_SLUG = "boj-helper";
 const IOS_BUNDLE_ID = process.env.EXPO_PUBLIC_IOS_BUNDLE_ID || "com.bojhelper.app";
 const ANDROID_PACKAGE = process.env.EXPO_PUBLIC_ANDROID_PACKAGE || "com.bojhelper.app";
 const APP_SCHEME = process.env.EXPO_PUBLIC_DEEP_LINK_SCHEME || "bojhelper";
+const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID?.trim();
+const EAS_BUILD_PROFILE = process.env.EAS_BUILD_PROFILE?.trim();
+const IS_RELEASE_BUILD = EAS_BUILD_PROFILE === "preview" || EAS_BUILD_PROFILE === "production";
+
+function requireBuildEnv(name: string): string {
+  const value = process.env[name];
+  if (!value || value.trim() === "") {
+    throw new Error(`[Build Config] ${name} is required for ${EAS_BUILD_PROFILE ?? "release"} builds`);
+  }
+  return value;
+}
+
+if (IS_RELEASE_BUILD) {
+  requireBuildEnv("EXPO_PUBLIC_API_BASE_URL");
+  requireBuildEnv("EAS_PROJECT_ID");
+}
+
+const extra: ExpoConfig["extra"] = {};
+if (EAS_PROJECT_ID) {
+  extra.eas = {
+    projectId: EAS_PROJECT_ID,
+  };
+}
 
 const config: ExpoConfig = {
   name: APP_NAME,
@@ -33,7 +56,6 @@ const config: ExpoConfig = {
     edgeToEdgeEnabled: true,
     predictiveBackGestureEnabled: false,
     package: ANDROID_PACKAGE,
-    permissions: ["POST_NOTIFICATIONS"],
     intentFilters: [
       {
         action: "VIEW",
@@ -55,19 +77,6 @@ const config: ExpoConfig = {
   },
   plugins: [
     "expo-router",
-    [
-      "expo-audio",
-      {
-        microphonePermission: "Allow $(PRODUCT_NAME) to access your microphone.",
-      },
-    ],
-    [
-      "expo-video",
-      {
-        supportsBackgroundPlayback: true,
-        supportsPictureInPicture: true,
-      },
-    ],
     [
       "expo-splash-screen",
       {
@@ -94,6 +103,7 @@ const config: ExpoConfig = {
     typedRoutes: true,
     reactCompiler: true,
   },
+  extra,
 };
 
 export default config;

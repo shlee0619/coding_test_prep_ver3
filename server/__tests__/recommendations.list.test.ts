@@ -178,4 +178,59 @@ describe("recommendations.list", () => {
     expect(result.items.length).toBeLessThanOrEqual(120);
     expect(result.stats?.totalCount).toBe(result.items.length);
   });
+
+  it("applies excludeSolved filter in realtime mode", async () => {
+    vi.mocked(db.getLatestRecommendations).mockResolvedValue(null as any);
+    vi.mocked(db.getLinkedAccount).mockResolvedValue({
+      id: 1,
+      userId: 1,
+      provider: "BOJ",
+      handle: "test",
+      verified: true,
+      solvedCount: 0,
+      tier: 10,
+      rating: 0,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    } as any);
+
+    vi.mocked(db.getUserSolvedProblems).mockResolvedValue([
+      {
+        id: 1,
+        userId: 1,
+        problemId: 1000,
+        status: "SOLVED",
+      },
+    ] as any);
+
+    vi.mocked(solvedac.searchProblems).mockResolvedValue({
+      items: [makeSearchProblem(1000), makeSearchProblem(1001)],
+      count: 2,
+    } as any);
+    vi.mocked(solvedac.getProblemsById).mockImplementation(async (ids: number[]) => {
+      return ids.map((id) => makeSearchProblem(id)) as any;
+    });
+    vi.mocked(db.getProblems).mockResolvedValue([]);
+    vi.mocked(db.upsertProblems).mockResolvedValue(undefined);
+
+    const caller = createCaller();
+
+    const excluded = await caller.recommendations.list({
+      realtime: true,
+      limit: 10,
+      excludeSolved: true,
+    });
+
+    const included = await caller.recommendations.list({
+      realtime: true,
+      limit: 10,
+      excludeSolved: false,
+    });
+
+    const excludedIds = excluded.items.map((item) => item.problemId);
+    const includedIds = included.items.map((item) => item.problemId);
+
+    expect(excludedIds).not.toContain(1000);
+    expect(includedIds).toContain(1000);
+  });
 });

@@ -7,30 +7,25 @@ import { registerOAuthRoutes } from "./oauth";
 import { appRouter } from "../routers";
 import { createContext } from "./context";
 import { ENV, validateRequiredEnvVars } from "./env";
+import { isDatabaseConfigured, isDatabaseReachable } from "../db";
+import { hasRedis } from "./redis";
 
-// CORS 허용 Origin 화이트리스트
-const ALLOWED_ORIGINS: string[] = [
-  "http://localhost:8081",
-  "http://localhost:3000",
-  "http://localhost:19006",
-  // 프로덕션 도메인 추가
-  ...(process.env.ALLOWED_ORIGINS?.split(",").map((o) => o.trim()).filter(Boolean) || []),
-];
+const LOCAL_ORIGINS: string[] = ["http://localhost:8081", "http://localhost:3000", "http://localhost:19006"];
 
 function isAllowedOrigin(origin: string | undefined): boolean {
   if (!origin) return false;
 
   // 개발 환경에서는 localhost 허용
-  if (!ENV.isProduction && origin.startsWith("http://localhost")) {
+  if (!ENV.isProduction && LOCAL_ORIGINS.includes(origin)) {
     return true;
   }
 
-  // Vercel 배포 환경: .vercel.app 도메인 허용
-  if (origin.endsWith(".vercel.app")) {
+  // 개발 환경에서만 Vercel preview 도메인을 허용
+  if (!ENV.isProduction && origin.endsWith(".vercel.app")) {
     return true;
   }
 
-  return ALLOWED_ORIGINS.includes(origin);
+  return ENV.allowedOrigins.includes(origin);
 }
 
 /**
@@ -74,8 +69,26 @@ export function createApp() {
 
   registerOAuthRoutes(app);
 
-  app.get("/api/health", (_req, res) => {
-    res.json({ ok: true, timestamp: Date.now() });
+  app.get("/api/health", async (_req, res) => {
+    const [databaseReachable] = await Promise.all([isDatabaseReachable()]);
+    const databaseConfigured = isDatabaseConfigured();
+    const redisEnabled = hasRedis();
+
+    const degraded = ENV.isProduction && (!databaseConfigured || !databaseReachable);
+
+    res.status(degraded ? 503 : 200).json({
+      ok: !degraded,
+      timestamp: Date.now(),
+      dependencies: {
+        database: {
+          configured: databaseConfigured,
+          reachable: databaseReachable,
+        },
+        redis: {
+          enabled: redisEnabled,
+        },
+      },
+    });
   });
 
   app.use(

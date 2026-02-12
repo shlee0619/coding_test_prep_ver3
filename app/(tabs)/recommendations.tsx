@@ -8,7 +8,6 @@ import {
   Modal,
   TextInput,
   Switch,
-  Platform,
 } from "react-native";
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "expo-router";
@@ -74,7 +73,8 @@ export default function RecommendationsScreen() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [tempSelectedTags, setTempSelectedTags] = useState<string[]>([]);
   const [tagSearchQuery, setTagSearchQuery] = useState("");
-  const [excludeSolved, setExcludeSolved] = useState(false); // UI state primarily for now
+  const [excludeSolved, setExcludeSolved] = useState(true);
+  const [tempExcludeSolved, setTempExcludeSolved] = useState(true);
 
   // 사용 가능한 태그 목록 조회
   const { data: availableTags } = trpc.analytics.availableTags.useQuery(undefined, {
@@ -94,6 +94,7 @@ export default function RecommendationsScreen() {
       levelMin: levelMin > 1 ? levelMin : undefined,
       levelMax: levelMax < 30 ? levelMax : undefined,
       tags: selectedTags.length > 0 ? selectedTags : undefined,
+      excludeSolved,
     },
     { enabled: isAuthenticated }
   );
@@ -135,7 +136,7 @@ export default function RecommendationsScreen() {
   const toggleBookmark = async (problemId: number) => {
     try {
       await bookmarkMutation.mutateAsync({ problemId });
-    } catch (error) {
+    } catch {
       // Error handled in onError
     }
   };
@@ -144,6 +145,7 @@ export default function RecommendationsScreen() {
     setLevelMin(tempLevelMin);
     setLevelMax(tempLevelMax);
     setSelectedTags(tempSelectedTags);
+    setExcludeSolved(tempExcludeSolved);
     setShowFilterModal(false);
   };
 
@@ -151,7 +153,8 @@ export default function RecommendationsScreen() {
     setTempLevelMin(1);
     setTempLevelMax(30);
     setTempSelectedTags([]);
-    setExcludeSolved(false);
+    setTempExcludeSolved(true);
+    setExcludeSolved(true);
     setLevelMin(1);
     setLevelMax(30);
     setSelectedTags([]);
@@ -173,7 +176,7 @@ export default function RecommendationsScreen() {
 
   // 통계
   const stats = recommendationData?.stats;
-  const hasActiveFilters = levelMin > 1 || levelMax < 30 || selectedTags.length > 0;
+  const hasActiveFilters = levelMin > 1 || levelMax < 30 || selectedTags.length > 0 || !excludeSolved;
 
   // 태그 검색 필터링
   const filteredTags = useMemo(() => {
@@ -215,6 +218,7 @@ export default function RecommendationsScreen() {
               setTempLevelMin(levelMin);
               setTempLevelMax(levelMax);
               setTempSelectedTags(selectedTags);
+              setTempExcludeSolved(excludeSolved);
               setTagSearchQuery("");
               setShowFilterModal(true);
             }}
@@ -760,8 +764,8 @@ export default function RecommendationsScreen() {
                     <Text className="text-xs text-muted mt-0.5">이미 푼 문제는 목록에서 숨깁니다.</Text>
                   </View>
                   <Switch
-                    value={excludeSolved}
-                    onValueChange={setExcludeSolved}
+                    value={tempExcludeSolved}
+                    onValueChange={setTempExcludeSolved}
                     trackColor={{ false: colors.border, true: colors.tint }}
                     thumbColor={"#ffffff"}
                   />

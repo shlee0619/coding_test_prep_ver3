@@ -17,7 +17,7 @@ export default function DashboardScreen() {
   const router = useRouter();
   const colors = useColors();
   const { showToast } = useToast();
-  const { user, isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [refreshing, setRefreshing] = useState(false);
   const [showSyncModal, setShowSyncModal] = useState(false);
 
@@ -47,7 +47,7 @@ export default function DashboardScreen() {
   const handleSync = async () => {
     try {
       await syncMutation.mutateAsync();
-    } catch (error: any) {
+    } catch {
       // Error handled in onError
     }
   };

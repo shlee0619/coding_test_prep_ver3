@@ -36,7 +36,9 @@ class TokenBlacklist {
     } else {
       this.blacklist.set(jti, { jti, expiresAt });
     }
-    console.log(`[TokenBlacklist] Token ${jti.substring(0, 8)}... added to blacklist`);
+    if (!ENV.isProduction) {
+      console.log("[TokenBlacklist] Token added to blacklist");
+    }
   }
 
   async isBlacklisted(jti: string): Promise<boolean> {
@@ -56,7 +58,9 @@ class TokenBlacklist {
       }
     }
     if (cleaned > 0) {
-      console.log(`[TokenBlacklist] Cleaned up ${cleaned} expired tokens`);
+      if (!ENV.isProduction) {
+        console.log(`[TokenBlacklist] Cleaned up ${cleaned} expired tokens`);
+      }
     }
   }
 

@@ -11,6 +11,14 @@ function optionalEnv(value: string | undefined, defaultValue: string = ""): stri
   return value ?? defaultValue;
 }
 
+function parseCsv(value: string | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(",")
+    .map((item) => item.trim())
+    .filter(Boolean);
+}
+
 // cookieSecret은 지연 평가로 처리 (서버 시작 시점에 검증)
 let _cookieSecret: string | null = null;
 
@@ -22,6 +30,7 @@ export const ENV = {
     return _cookieSecret;
   },
   databaseUrl: optionalEnv(process.env.DATABASE_URL),
+  allowedOrigins: parseCsv(process.env.ALLOWED_ORIGINS),
   // Optional: OWNER_OPEN_ID와 일치하는 사용자를 admin으로 승격
   ownerOpenId: optionalEnv(process.env.OWNER_OPEN_ID),
   isProduction: process.env.NODE_ENV === "production",
@@ -34,6 +43,10 @@ export const ENV = {
 // 서버 시작 시 필수 환경변수 검증
 export function validateRequiredEnvVars(): void {
   // cookieSecret getter를 호출하여 JWT_SECRET 검증
-  const _ = ENV.cookieSecret;
+  void ENV.cookieSecret;
+  if (ENV.isProduction) {
+    requireEnv("DATABASE_URL", process.env.DATABASE_URL);
+    requireEnv("ALLOWED_ORIGINS", process.env.ALLOWED_ORIGINS);
+  }
   console.log("[ENV] Required environment variables validated");
 }
