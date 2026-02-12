@@ -11,7 +11,13 @@
       "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 add -A)",
       "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 status --short)",
       "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 reset HEAD .env)",
-      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 rm --cached .env)"
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 rm --cached .env)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nfix: BOJ 로그인 허위 인증 실패 수정 — pre-flight 세션 쿠키 및 CSRF 토큰 지원\n\nBOJ signin 엔드포인트에 직접 POST를 보낼 때 세션 쿠키가 없어\n올바른 자격증명도 INVALID_CREDENTIALS로 반환되던 문제를 수정.\n\n- boj-auth.ts: 로그인 페이지 GET으로 세션 쿠키/CSRF 토큰 수집 후 POST에 포함\n- oauth.ts: UNEXPECTED_RESPONSE를 완화 모드에 추가, 기존 사용자 재로그인 허용\n- login.tsx/api.ts: detail 필드로 디버깅 정보 UI 표시\n- 테스트 10건 통과 \\(기존 5건 업데이트 + 신규 5건 추가\\)\n\nCo-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 push -u origin main)",
+      "Bash(git -C /Users/shlee/Desktop/coding_test_prep_ver3 remote set-url origin git@github.com:shlee0619/coding_test_prep_ver3.git)",
+      "Bash(ssh-keyscan:*)",
+      "Bash(~/.ssh/known_hosts)",
+      "Bash(ls:*)"
     ]
   }
 }
