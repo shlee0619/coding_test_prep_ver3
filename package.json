@@ -19,7 +19,10 @@
     "ios": "expo start --ios",
     "qr": "node scripts/generate_qr.mjs",
     "fill-catalog": "tsx scripts/fill-problem-catalog.ts",
-    "smoke:api": "node scripts/smoke-api.mjs"
+    "smoke:api": "node scripts/smoke-api.mjs",
+    "security:jwt-secret": "node scripts/generate-jwt-secret.mjs",
+    "release:env": "node scripts/validate-release-env.mjs",
+    "release:gate": "node scripts/release-gate.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

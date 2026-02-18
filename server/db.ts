@@ -232,6 +232,18 @@ export async function getSyncJob(jobId: number): Promise<SyncJob | undefined> {
   return result.length > 0 ? result[0] : undefined;
 }
 
+export async function getSyncJobForUser(jobId: number, userId: number): Promise<SyncJob | undefined> {
+  const db = await getDb();
+  if (!db) return undefined;
+
+  const result = await db
+    .select()
+    .from(syncJobs)
+    .where(and(eq(syncJobs.id, jobId), eq(syncJobs.userId, userId)))
+    .limit(1);
+  return result.length > 0 ? result[0] : undefined;
+}
+
 export async function getLatestSyncJob(userId: number): Promise<SyncJob | undefined> {
   const db = await getDb();
   if (!db) return undefined;
@@ -512,11 +524,51 @@ export async function updateGoal(goalId: number, data: Partial<InsertGoal>): Pro
   await db.update(goals).set(data).where(eq(goals.id, goalId));
 }
 
+export async function updateGoalForUser(
+  userId: number,
+  goalId: number,
+  data: Partial<InsertGoal>,
+): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await db
+    .select({ id: goals.id })
+    .from(goals)
+    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .limit(1);
+
+  if (existing.length === 0) {
+    return false;
+  }
+
+  await db.update(goals).set(data).where(eq(goals.id, goalId));
+  return true;
+}
+
 export async function deleteGoal(goalId: number): Promise<void> {
   const db = await getDb();
   if (!db) throw new Error("Database not available");
 
   await db.delete(goals).where(eq(goals.id, goalId));
+}
+
+export async function deleteGoalForUser(userId: number, goalId: number): Promise<boolean> {
+  const db = await getDb();
+  if (!db) throw new Error("Database not available");
+
+  const existing = await db
+    .select({ id: goals.id })
+    .from(goals)
+    .where(and(eq(goals.id, goalId), eq(goals.userId, userId)))
+    .limit(1);
+
+  if (existing.length === 0) {
+    return false;
+  }
+
+  await db.delete(goals).where(eq(goals.id, goalId));
+  return true;
 }
 
 /**

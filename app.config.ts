@@ -21,6 +21,8 @@ function requireBuildEnv(name: string): string {
 if (IS_RELEASE_BUILD) {
   requireBuildEnv("EXPO_PUBLIC_API_BASE_URL");
   requireBuildEnv("EAS_PROJECT_ID");
+  requireBuildEnv("EXPO_PUBLIC_PRIVACY_POLICY_URL");
+  requireBuildEnv("EXPO_PUBLIC_TERMS_OF_SERVICE_URL");
 }
 
 const extra: ExpoConfig["extra"] = {};

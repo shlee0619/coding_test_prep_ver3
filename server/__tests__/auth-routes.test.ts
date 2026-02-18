@@ -120,7 +120,7 @@ describe("Auth routes", () => {
     expect(body.code).toBe("INVALID_CREDENTIALS");
   });
 
-  it("allows relogin for existing user even when BOJ returns INVALID_CREDENTIALS", async () => {
+  it("returns 401 for INVALID_CREDENTIALS even when user already exists", async () => {
     const now = new Date();
     const existingUser: MockUser = {
       id: 1,
@@ -141,28 +141,6 @@ describe("Auth routes", () => {
       detail: "302 -> /login?error=1",
     });
     vi.mocked(db.getUserByOpenId).mockResolvedValue(existingUser as any);
-    vi.mocked(solvedac.getUserProfile).mockResolvedValueOnce({
-      handle: "tourist",
-      solvedCount: 1500,
-      tier: 31,
-      rating: 3500,
-    } as any);
-    vi.mocked(db.upsertUser).mockResolvedValue(undefined);
-    vi.mocked(db.getLinkedAccount).mockResolvedValueOnce({
-      id: 1,
-      userId: 1,
-      provider: "BOJ",
-      handle: "tourist",
-      verified: true,
-      solvedCount: 1400,
-      tier: 30,
-      rating: 3300,
-      createdAt: now,
-      updatedAt: now,
-    } as any);
-    vi.mocked(db.updateLinkedAccount).mockResolvedValue(undefined);
-    vi.mocked(sdk.createSessionToken).mockResolvedValueOnce("session-token-relogin");
-
     const response = await fetch(`${baseUrl}/api/auth/boj/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -170,11 +148,10 @@ describe("Auth routes", () => {
     });
     const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(body.success).toBe(true);
-    expect(body.app_session_id).toBe("session-token-relogin");
-    expect(Array.isArray(body.warnings)).toBe(true);
-    expect(body.warnings.join(" ")).toContain("기존 계정");
+    expect(response.status).toBe(401);
+    expect(body.success).toBe(false);
+    expect(body.code).toBe("INVALID_CREDENTIALS");
+    expect(sdk.createSessionToken).not.toHaveBeenCalled();
   });
 
   it("allows login even when solved.ac profile is not found", async () => {
@@ -208,48 +185,12 @@ describe("Auth routes", () => {
     expect(Array.isArray(body.warnings)).toBe(true);
   });
 
-  it("allows relogin for existing user when BOJ verification is temporarily unavailable", async () => {
-    const now = new Date();
-    const existingUser: MockUser = {
-      id: 1,
-      openId: "boj:tourist",
-      name: "tourist",
-      email: null,
-      loginMethod: "boj",
-      role: "user",
-      createdAt: now,
-      updatedAt: now,
-      lastSignedIn: now,
-    };
-
+  it("returns 503 when BOJ verification is temporarily unavailable", async () => {
     vi.mocked(verifyBojCredentials).mockResolvedValueOnce({
       ok: false,
       code: "NETWORK_ERROR",
       message: "network unstable",
     });
-    vi.mocked(db.getUserByOpenId).mockResolvedValueOnce(existingUser as any);
-    vi.mocked(solvedac.getUserProfile).mockResolvedValueOnce({
-      handle: "tourist",
-      solvedCount: 1500,
-      tier: 31,
-      rating: 3500,
-    } as any);
-    vi.mocked(db.upsertUser).mockResolvedValue(undefined);
-    vi.mocked(db.getUserByOpenId).mockResolvedValueOnce(existingUser as any);
-    vi.mocked(db.getLinkedAccount).mockResolvedValueOnce({
-      id: 1,
-      userId: 1,
-      provider: "BOJ",
-      handle: "tourist",
-      verified: true,
-      solvedCount: 1000,
-      tier: 30,
-      rating: 3400,
-      createdAt: now,
-      updatedAt: now,
-    } as any);
-    vi.mocked(db.updateLinkedAccount).mockResolvedValue(undefined);
-    vi.mocked(sdk.createSessionToken).mockResolvedValueOnce("session-token-123");
 
     const response = await fetch(`${baseUrl}/api/auth/boj/login`, {
       method: "POST",
@@ -258,10 +199,10 @@ describe("Auth routes", () => {
     });
     const body = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(body.success).toBe(true);
-    expect(Array.isArray(body.warnings)).toBe(true);
-    expect(body.warnings.length).toBeGreaterThan(0);
+    expect(response.status).toBe(503);
+    expect(body.success).toBe(false);
+    expect(body.code).toBe("NETWORK_ERROR");
+    expect(sdk.createSessionToken).not.toHaveBeenCalled();
   });
 
   it("logs in successfully and returns app session token", async () => {

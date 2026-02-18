@@ -111,6 +111,22 @@ export default function RootLayout() {
               <Stack screenOptions={{ headerShown: false }}>
                 <Stack.Screen name="(tabs)" />
                 <Stack.Screen
+                  name="privacy"
+                  options={{
+                    headerShown: true,
+                    title: "개인정보처리방침",
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
+                  name="terms"
+                  options={{
+                    headerShown: true,
+                    title: "이용약관",
+                    presentation: "card",
+                  }}
+                />
+                <Stack.Screen
                   name="problem/[id]"
                   options={{
                     headerShown: true,

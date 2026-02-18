@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { COOKIE_NAME } from "../shared/const.js";
 import { getSessionCookieOptions } from "./_core/cookies";
 import { systemRouter } from "./_core/systemRouter";
@@ -437,7 +438,7 @@ export const appRouter = router({
       .input(z.object({ jobId: z.number().optional() }).optional())
       .query(async ({ ctx, input }) => {
         if (input?.jobId) {
-          return db.getSyncJob(input.jobId);
+          return db.getSyncJobForUser(input.jobId, ctx.user.id);
         }
         // 최신 동기화 상태 반환
         return db.getLatestSyncJob(ctx.user.id);
@@ -881,19 +882,31 @@ export const appRouter = router({
         currentValue: z.number().optional(),
         status: z.enum(["active", "completed", "failed"]).optional(),
       }))
-      .mutation(async ({ input }) => {
-        await db.updateGoal(input.goalId, {
+      .mutation(async ({ ctx, input }) => {
+        const updated = await db.updateGoalForUser(ctx.user.id, input.goalId, {
           title: input.title,
           currentValue: input.currentValue,
           status: input.status,
         });
+        if (!updated) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "수정할 목표를 찾을 수 없습니다.",
+          });
+        }
         return { success: true };
       }),
 
     delete: protectedProcedure
       .input(z.object({ goalId: z.number() }))
-      .mutation(async ({ input }) => {
-        await db.deleteGoal(input.goalId);
+      .mutation(async ({ ctx, input }) => {
+        const deleted = await db.deleteGoalForUser(ctx.user.id, input.goalId);
+        if (!deleted) {
+          throw new TRPCError({
+            code: "NOT_FOUND",
+            message: "삭제할 목표를 찾을 수 없습니다.",
+          });
+        }
         return { success: true };
       }),
   }),

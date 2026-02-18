@@ -128,22 +128,27 @@ export function registerOAuthRoutes(app: Express) {
     try {
       const verifyResult = await verifyBojCredentials(normalizedHandle, password);
       const openId = `boj:${normalizedHandle.toLowerCase()}`;
-      const existingUser = await getUserByOpenId(openId);
-      const verificationSkipped =
-        !verifyResult.ok &&
-        (verifyResult.code === "CHALLENGE_REQUIRED" ||
+      if (!verifyResult.ok) {
+        const isTemporaryVerificationError =
+          verifyResult.code === "CHALLENGE_REQUIRED" ||
           verifyResult.code === "NETWORK_ERROR" ||
-          verifyResult.code === "UNEXPECTED_RESPONSE" ||
-          (verifyResult.code === "INVALID_CREDENTIALS" && !!existingUser));
-
-      if (!verifyResult.ok && !verificationSkipped) {
-        const status = verifyResult.code === "INVALID_CREDENTIALS" ? 401 : 400;
+          verifyResult.code === "UNEXPECTED_RESPONSE";
+        const status =
+          verifyResult.code === "INVALID_CREDENTIALS"
+            ? 401
+            : isTemporaryVerificationError
+              ? 503
+              : 400;
         const body: { success: false; error: string; code: string; detail?: string } = {
           success: false,
-          error: verifyResult.message,
+          error: isTemporaryVerificationError
+            ? "백준 인증이 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요."
+            : verifyResult.message,
           code: verifyResult.code,
         };
-        if (verifyResult.detail) body.detail = verifyResult.detail;
+        if (!isTemporaryVerificationError && verifyResult.detail) {
+          body.detail = verifyResult.detail;
+        }
         res.status(status).json(body);
         return;
       }
@@ -185,17 +190,6 @@ export function registerOAuthRoutes(app: Express) {
       res.cookie(COOKIE_NAME, sessionToken, { ...cookieOptions, maxAge: ONE_YEAR_MS });
 
       const warnings: string[] = [];
-      if (verificationSkipped) {
-        if (verifyResult.code === "INVALID_CREDENTIALS" && existingUser) {
-          warnings.push(
-            "백준 자동 검증 결과와 불일치했지만 기존 계정 재로그인을 허용했습니다.",
-          );
-        } else {
-          warnings.push(
-            "백준 자동 검증이 일시적으로 불안정하여 완화 모드로 로그인했습니다.",
-          );
-        }
-      }
       if (!profile) {
         warnings.push(
           "solved.ac 프로필을 찾지 못해 계정 연동 정보 동기화가 건너뛰어졌습니다.",

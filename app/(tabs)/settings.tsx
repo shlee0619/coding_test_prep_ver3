@@ -39,6 +39,26 @@ export default function SettingsScreen() {
     onSuccess: () => refetch(),
   });
 
+  const openPolicy = async (url: string, fallbackPath: "/privacy" | "/terms") => {
+    const normalized = url.trim().toLowerCase();
+    const isPlaceholderUrl =
+      normalized.length === 0 ||
+      normalized.includes("boj-helper.app") ||
+      normalized.includes("example.com");
+
+    if (isPlaceholderUrl) {
+      router.push(fallbackPath as never);
+      return;
+    }
+
+    try {
+      await Linking.openURL(url);
+    } catch (error) {
+      console.warn("[Settings] policy link open failed:", error);
+      router.push(fallbackPath as never);
+    }
+  };
+
   const runLogout = async () => {
     if (isLoggingOut) return;
     setIsLoggingOut(true);
@@ -284,7 +304,7 @@ export default function SettingsScreen() {
 
           <TouchableOpacity
             className="p-4 flex-row items-center justify-between border-b border-border"
-            onPress={() => Linking.openURL(TERMS_OF_SERVICE_URL)}
+            onPress={() => openPolicy(TERMS_OF_SERVICE_URL, "/terms")}
             accessibilityLabel="이용약관"
             accessibilityRole="link"
           >
@@ -294,7 +314,7 @@ export default function SettingsScreen() {
 
           <TouchableOpacity
             className="p-4 flex-row items-center justify-between"
-            onPress={() => Linking.openURL(PRIVACY_POLICY_URL)}
+            onPress={() => openPolicy(PRIVACY_POLICY_URL, "/privacy")}
             accessibilityLabel="개인정보처리방침"
             accessibilityRole="link"
           >

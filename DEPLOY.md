@@ -21,12 +21,26 @@
 
 서버는 production에서 `DATABASE_URL`, `ALLOWED_ORIGINS`, `JWT_SECRET`가 없으면 시작하지 않습니다.
 
+운영 환경 반영 전 검증(권장):
+
+```bash
+pnpm release:env -- --target api
+```
+
 ### 앱 빌드 (EAS preview/production)
 
 - `EXPO_PUBLIC_API_BASE_URL` (필수)
 - `EAS_PROJECT_ID` (필수)
+- `EXPO_PUBLIC_PRIVACY_POLICY_URL` (필수)
+- `EXPO_PUBLIC_TERMS_OF_SERVICE_URL` (필수)
 
 `preview`/`production` 빌드에서 위 값이 없으면 `app.config.ts`에서 빌드 실패하도록 강제합니다.
+
+EAS 빌드 환경 검증(권장):
+
+```bash
+pnpm release:env -- --target preview,production
+```
 
 ## 3) Always-on API 배포 (Render 예시)
 
@@ -37,6 +51,13 @@
 2. Blueprint 또는 수동 Web Service 생성
 3. 환경변수 설정
 4. Health check 확인: `/api/health`
+
+JWT 시크릿 교체(즉시 만료):
+
+```bash
+pnpm security:jwt-secret
+# 출력된 값을 JWT_SECRET으로 교체 후 API 재배포
+```
 
 ## 4) Vercel 웹 배포
 
@@ -56,6 +77,8 @@ eas init
 ```bash
 eas env:create --environment preview --name EXPO_PUBLIC_API_BASE_URL --value "https://api.your-domain.com"
 eas env:create --environment preview --name EAS_PROJECT_ID --value "your-project-id"
+eas env:create --environment preview --name EXPO_PUBLIC_PRIVACY_POLICY_URL --value "https://app.your-domain.com/privacy"
+eas env:create --environment preview --name EXPO_PUBLIC_TERMS_OF_SERVICE_URL --value "https://app.your-domain.com/terms"
 ```
 
 3. 내부배포 빌드
@@ -93,6 +116,10 @@ eas submit --platform android --latest
 
 - [ ] API 서버가 always-on 환경에서 `/api/health` 정상(200)
 - [ ] `EXPO_PUBLIC_API_BASE_URL`가 preview/production에 각각 설정됨
-- [ ] `PRIVACY_POLICY_URL`, `TERMS_OF_SERVICE_URL`이 실제 문서 URL
+- [ ] `EXPO_PUBLIC_PRIVACY_POLICY_URL`, `EXPO_PUBLIC_TERMS_OF_SERVICE_URL`이 실제 문서 URL
+- [ ] `pnpm release:env -- --target api` 통과
+- [ ] `pnpm release:env -- --target preview,production` 통과
+- [ ] JWT 시크릿 교체 후 재로그인 강제 동작 확인
 - [ ] `pnpm check && pnpm lint && pnpm test && pnpm build` 통과
+- [ ] `pnpm release:gate -- --api https://<api-domain> --privacy https://<app-domain>/privacy --terms https://<app-domain>/terms` 통과
 - [ ] EAS preview 빌드(TestFlight/Internal Test)에서 로그인 → 동기화 → 추천 조회 검증
