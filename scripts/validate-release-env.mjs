@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+import "dotenv/config";
+
 const args = process.argv.slice(2);
 
 function getArgValue(name) {
@@ -62,7 +64,7 @@ function assertNotPlaceholder(name, value, errors) {
   if (
     lowered.includes("example.com") ||
     lowered.includes("<app-domain>") ||
-    lowered.includes("boj-helper.app")
+    lowered.includes("solvemate.app")
   ) {
     errors.push(`${name} appears to be a placeholder URL: ${value}`);
   }

@@ -73,6 +73,10 @@ export default function LoginScreen() {
       if (result.success && result.app_session_id) {
         // 세션 토큰 저장 (웹: sessionStorage, Native: SecureStore)
         await Auth.setSessionToken(result.app_session_id);
+        if (Platform.OS === "web") {
+          // Keep backend cookie in sync to avoid stale account cookie wins.
+          await Api.establishSession(result.app_session_id);
+        }
         if (result.user) {
           await Auth.setUserInfo({
             id: result.user.id,
@@ -138,9 +142,9 @@ export default function LoginScreen() {
           {/* Logo and Title */}
           <View className="items-center mb-8">
             <View className="w-24 h-24 bg-primary rounded-3xl items-center justify-center mb-6">
-              <Text className="text-5xl font-bold text-background">B</Text>
+              <Text className="text-5xl font-bold text-background">S</Text>
             </View>
-            <Text className="text-3xl font-bold text-foreground mb-2">BOJ Helper</Text>
+            <Text className="text-3xl font-bold text-foreground mb-2">SolveMate</Text>
             <Text className="text-base text-muted text-center">
               백준 계정으로 solved.ac에 연결
             </Text>

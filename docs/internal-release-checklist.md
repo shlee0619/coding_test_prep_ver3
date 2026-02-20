@@ -1,4 +1,4 @@
-# BOJ Helper Internal Release Checklist
+# SolveMate Internal Release Checklist
 
 ## Day 0 - Baseline
 

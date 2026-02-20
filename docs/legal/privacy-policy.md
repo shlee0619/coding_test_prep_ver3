@@ -1,9 +1,9 @@
-# BOJ Helper 개인정보처리방침
+# SolveMate 개인정보처리방침
 
 - 시행일: 2026-02-17
-- 서비스명: BOJ Helper
-- 사업자명: BOJ Helper Team
-- 문의: support@boj-helper.app
+- 서비스명: SolveMate
+- 사업자명: SolveMate Team
+- 문의: support@solvemate.app
 
 ## 1. 수집하는 개인정보 항목
 

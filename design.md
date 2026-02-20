@@ -1,4 +1,4 @@
-# BOJ Helper 모바일 앱 디자인 문서
+# SolveMate 모바일 앱 디자인 문서
 
 ## 앱 개요
 

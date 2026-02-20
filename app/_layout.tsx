@@ -28,7 +28,7 @@ import { ErrorBoundary } from "@/components/error-boundary";
 
 const asyncStoragePersister = createAsyncStoragePersister({
   storage: AsyncStorage,
-  key: "boj-helper-query-cache",
+  key: "solvemate-query-cache",
 });
 
 const DEFAULT_WEB_INSETS: EdgeInsets = { top: 0, right: 0, bottom: 0, left: 0 };

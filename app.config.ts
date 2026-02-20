@@ -1,11 +1,11 @@
 import "./scripts/load-env.js";
 import type { ExpoConfig } from "expo/config";
 
-const APP_NAME = "BOJ Helper";
-const APP_SLUG = "boj-helper";
-const IOS_BUNDLE_ID = process.env.EXPO_PUBLIC_IOS_BUNDLE_ID || "com.bojhelper.app";
-const ANDROID_PACKAGE = process.env.EXPO_PUBLIC_ANDROID_PACKAGE || "com.bojhelper.app";
-const APP_SCHEME = process.env.EXPO_PUBLIC_DEEP_LINK_SCHEME || "bojhelper";
+const APP_NAME = "SolveMate";
+const APP_SLUG = "solvemate";
+const IOS_BUNDLE_ID = process.env.EXPO_PUBLIC_IOS_BUNDLE_ID || "com.solvemate.app";
+const ANDROID_PACKAGE = process.env.EXPO_PUBLIC_ANDROID_PACKAGE || "com.solvemate.app";
+const APP_SCHEME = process.env.EXPO_PUBLIC_DEEP_LINK_SCHEME || "solvemate";
 const EAS_PROJECT_ID = process.env.EAS_PROJECT_ID?.trim();
 const EAS_BUILD_PROFILE = process.env.EAS_BUILD_PROFILE?.trim();
 const IS_RELEASE_BUILD = EAS_BUILD_PROFILE === "preview" || EAS_BUILD_PROFILE === "production";

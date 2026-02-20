@@ -66,7 +66,7 @@ export default function DashboardScreen() {
       <ScreenContainer className="p-6">
         <View className="flex-1 items-center justify-center gap-6">
           <View className="items-center gap-2">
-            <Text className="text-4xl font-bold text-foreground">BOJ Helper</Text>
+            <Text className="text-4xl font-bold text-foreground">SolveMate</Text>
             <Text className="text-base text-muted text-center">
               백준 온라인 저지 학습을 도와드립니다
             </Text>

@@ -43,7 +43,7 @@ export default function SettingsScreen() {
     const normalized = url.trim().toLowerCase();
     const isPlaceholderUrl =
       normalized.length === 0 ||
-      normalized.includes("boj-helper.app") ||
+      normalized.includes("solvemate.app") ||
       normalized.includes("example.com");
 
     if (isPlaceholderUrl) {

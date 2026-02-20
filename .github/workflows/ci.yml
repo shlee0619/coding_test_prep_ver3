@@ -13,7 +13,7 @@ jobs:
     env:
       NODE_ENV: test
       JWT_SECRET: ci-test-jwt-secret-value
-      DATABASE_URL: mysql://user:pass@localhost:3306/boj_helper
+      DATABASE_URL: mysql://user:pass@localhost:3306/solvemate
       ALLOWED_ORIGINS: https://app.example.com
       EXPO_PUBLIC_API_BASE_URL: https://api.example.com
       EAS_PROJECT_ID: 00000000-0000-0000-0000-000000000000

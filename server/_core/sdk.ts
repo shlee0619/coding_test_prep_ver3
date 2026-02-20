@@ -157,7 +157,9 @@ class SDKServer {
         jti: typeof jti === "string" ? jti : undefined,
       };
     } catch (error) {
-      console.warn("[Auth] Session verification failed", String(error));
+      if (!ENV.isProduction) {
+        console.warn("[Auth] Session verification failed", String(error));
+      }
       return null;
     }
   }

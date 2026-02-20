@@ -1,4 +1,4 @@
-# BOJ Helper 앱 출시 재점검 보고서
+# SolveMate 앱 출시 재점검 보고서
 
 - 작성일: 2026-02-16
 - 대상 저장소: `/Users/shlee/Desktop/coding_test_prep_ver3`

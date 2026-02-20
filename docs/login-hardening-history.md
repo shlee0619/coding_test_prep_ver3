@@ -1,7 +1,7 @@
 # Login Hardening History
 
 ## 1. 문서 목적
-이 문서는 `BOJ Helper`에서 발생한 로그인/로그아웃 이슈에 대해,  
+이 문서는 `SolveMate`에서 발생한 로그인/로그아웃 이슈에 대해,  
 시도한 보완 작업과 최종 적용 상태를 추적하기 위한 기록 문서다.
 
 - 기준 저장소: `/Users/shlee/Desktop/coding_test_prep_ver3`

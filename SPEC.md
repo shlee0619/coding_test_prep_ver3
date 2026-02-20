@@ -1,4 +1,4 @@
-# BOJ Helper 명세서 (Repository Specification)
+# SolveMate 명세서 (Repository Specification)
 
 ## 1. 문서 목적
 이 문서는 `/Users/shlee/Desktop/coding_test_prep_ver3` 저장소의 현재 구현 기준 기능/구조/인터페이스를 정의한다.
@@ -6,7 +6,7 @@
 - 범위: 모바일/웹 앱, 서버 API, DB 스키마, 동기화/추천 로직, 실행/배포
 
 ## 2. 프로젝트 개요
-- 서비스명: `BOJ Helper`
+- 서비스명: `SolveMate`
 - 목적: BOJ(백준) 학습 데이터를 수집/분석하고, 약점 기반 문제 추천과 목표 관리를 제공
 - 동작 형태:
   - 프론트엔드: Expo + React Native + Expo Router (iOS/Android/Web)

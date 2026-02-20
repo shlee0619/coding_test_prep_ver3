@@ -19,7 +19,7 @@
 
 ### 2) 설정 화면 정책 링크 폴백 처리
 
-- 정책 URL이 미설정/placeholder(`example.com`, `boj-helper.app`)일 때
+- 정책 URL이 미설정/placeholder(`example.com`, `solvemate.app`)일 때
   외부 링크 대신 앱 내부 `/privacy`, `/terms`로 이동하도록 변경
 - 변경 파일:
   - `app/(tabs)/settings.tsx`
@@ -54,10 +54,10 @@ pnpm build
 추가 검증:
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL=https://api.bojhelper.dev \
+EXPO_PUBLIC_API_BASE_URL=https://api.solvemate.dev \
 EAS_PROJECT_ID=11111111-1111-1111-1111-111111111111 \
-EXPO_PUBLIC_PRIVACY_POLICY_URL=https://app.bojhelper.dev/privacy \
-EXPO_PUBLIC_TERMS_OF_SERVICE_URL=https://app.bojhelper.dev/terms \
+EXPO_PUBLIC_PRIVACY_POLICY_URL=https://app.solvemate.dev/privacy \
+EXPO_PUBLIC_TERMS_OF_SERVICE_URL=https://app.solvemate.dev/terms \
 pnpm build:web
 ```
 
@@ -66,17 +66,17 @@ pnpm build:web
 
 ```bash
 NODE_ENV=production \
-DATABASE_URL='mysql://user:password@db.internal:3306/boj_helper' \
+DATABASE_URL='mysql://user:password@db.internal:3306/solvemate' \
 JWT_SECRET='this-is-a-demo-secret-string-with-more-than-32-characters-12345' \
-ALLOWED_ORIGINS='https://app.bojhelper.dev' \
+ALLOWED_ORIGINS='https://app.solvemate.dev' \
 pnpm release:env -- --target api
 ```
 
 ```bash
-EXPO_PUBLIC_API_BASE_URL='https://api.bojhelper.dev' \
+EXPO_PUBLIC_API_BASE_URL='https://api.solvemate.dev' \
 EAS_PROJECT_ID='11111111-1111-1111-1111-111111111111' \
-EXPO_PUBLIC_PRIVACY_POLICY_URL='https://app.bojhelper.dev/privacy' \
-EXPO_PUBLIC_TERMS_OF_SERVICE_URL='https://app.bojhelper.dev/terms' \
+EXPO_PUBLIC_PRIVACY_POLICY_URL='https://app.solvemate.dev/privacy' \
+EXPO_PUBLIC_TERMS_OF_SERVICE_URL='https://app.solvemate.dev/terms' \
 pnpm release:env -- --target preview,production
 ```
 

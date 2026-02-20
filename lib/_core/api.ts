@@ -12,28 +12,34 @@ type AuthenticatedUser = {
   lastSignedIn: string;
 };
 
+type LoginResponse = {
+  success: boolean;
+  app_session_id?: string;
+  user?: AuthenticatedUser;
+  error?: string;
+  code?: string;
+  /** 서버가 반환한 구체적 원인(디버깅용). 로그인 실패 시 UI에 표시 */
+  detail?: string;
+  warnings?: string[];
+};
+
 export async function apiCall<T>(endpoint: string, options: RequestInit = {}): Promise<T> {
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
     ...((options.headers as Record<string, string>) || {}),
   };
 
-  // Determine the auth method:
-  // - Native platform: use stored session token as Bearer auth
-  // - Web (including iframe): use cookie-based auth (browser handles automatically)
-  //   Cookie is set on backend domain via POST /api/auth/session after receiving token via postMessage
-  if (Platform.OS !== "web") {
-    const sessionToken = await Auth.getSessionToken();
-    devLog("[API] Request", {
-      endpoint,
-      hasToken: !!sessionToken,
-      method: options.method || "GET",
-    });
-    if (sessionToken) {
-      headers["Authorization"] = `Bearer ${sessionToken}`;
-    }
-  } else {
-    devLog("[API] Request", { endpoint, platform: "web", method: options.method || "GET" });
+  // Always prefer Bearer token when available.
+  // On web this avoids stale-cookie account mixups after account switching.
+  const sessionToken = await Auth.getSessionToken();
+  devLog("[API] Request", {
+    endpoint,
+    platform: Platform.OS,
+    hasToken: !!sessionToken,
+    method: options.method || "GET",
+  });
+  if (sessionToken) {
+    headers["Authorization"] = `Bearer ${sessionToken}`;
   }
 
   const baseUrl = getApiBaseUrl();
@@ -104,21 +110,39 @@ export async function apiCall<T>(endpoint: string, options: RequestInit = {}): P
 export async function bojLogin(
   handle: string,
   password: string,
-): Promise<{
-  success: boolean;
-  app_session_id?: string;
-  user?: AuthenticatedUser;
-  error?: string;
-  code?: string;
-  /** 서버가 반환한 구체적 원인(디버깅용). 로그인 실패 시 UI에 표시 */
-  detail?: string;
-}> {
+): Promise<LoginResponse> {
   return apiCall("/api/auth/boj/login", {
     method: "POST",
     body: JSON.stringify({
       handle,
       password,
     }),
+  });
+}
+
+export async function startSolvedAcChallenge(
+  handle: string,
+): Promise<{
+  success: boolean;
+  challengeId?: string;
+  token?: string;
+  handle?: string;
+  expiresAt?: string;
+  instructions?: string;
+  error?: string;
+  code?: string;
+  detail?: string;
+}> {
+  return apiCall("/api/auth/solvedac/challenge/start", {
+    method: "POST",
+    body: JSON.stringify({ handle }),
+  });
+}
+
+export async function verifySolvedAcChallenge(challengeId: string): Promise<LoginResponse> {
+  return apiCall("/api/auth/solvedac/challenge/verify", {
+    method: "POST",
+    body: JSON.stringify({ challengeId }),
   });
 }
 

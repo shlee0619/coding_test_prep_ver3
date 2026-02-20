@@ -50,5 +50,5 @@ export function getApiBaseUrl(): string {
   return "";
 }
 
-export const SESSION_TOKEN_KEY = "boj-helper-session-token";
-export const USER_INFO_KEY = "boj-helper-user-info";
+export const SESSION_TOKEN_KEY = "solvemate-session-token";
+export const USER_INFO_KEY = "solvemate-user-info";

@@ -330,7 +330,7 @@ export const appRouter = router({
     me: publicProcedure.query((opts) => opts.ctx.user),
     logout: publicProcedure.mutation(({ ctx }) => {
       const cookieOptions = getSessionCookieOptions(ctx.req);
-      ctx.res.clearCookie(COOKIE_NAME, { ...cookieOptions, maxAge: -1 });
+      ctx.res.clearCookie(COOKIE_NAME, cookieOptions);
       return {
         success: true,
       } as const;
@@ -357,7 +357,17 @@ export const appRouter = router({
 
         const verifyResult = await verifyBojCredentials(handle, input.password);
         if (!verifyResult.ok) {
-          throw new Error(verifyResult.message);
+          const isTemporaryVerificationError =
+            verifyResult.code === "CHALLENGE_REQUIRED" ||
+            verifyResult.code === "NETWORK_ERROR" ||
+            verifyResult.code === "UNEXPECTED_RESPONSE";
+          if (isTemporaryVerificationError) {
+            console.warn(
+              `[Link] BOJ verification skipped temporarily (${verifyResult.code}) for handle=${handle}`,
+            );
+          } else {
+            throw new Error(verifyResult.message);
+          }
         }
 
         // Check if handle exists on solved.ac

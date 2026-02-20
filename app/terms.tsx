@@ -8,7 +8,7 @@ const SECTIONS: { title: string; items: string[] }[] = [
   {
     title: "1. 목적",
     items: [
-      "본 약관은 BOJ Helper가 제공하는 서비스 이용과 관련한 권리, 의무 및 책임사항을 규정합니다.",
+      "본 약관은 SolveMate가 제공하는 서비스 이용과 관련한 권리, 의무 및 책임사항을 규정합니다.",
     ],
   },
   {
@@ -87,7 +87,7 @@ export default function TermsOfServiceScreen() {
             marginBottom: 16,
           }}
         >
-          <Text className="text-xl font-bold text-foreground mb-2">BOJ Helper 이용약관</Text>
+          <Text className="text-xl font-bold text-foreground mb-2">SolveMate 이용약관</Text>
           <Text className="text-sm text-muted">시행일: 2026-02-17</Text>
         </View>
 
@@ -122,9 +122,9 @@ export default function TermsOfServiceScreen() {
           }}
         >
           <Text className="text-base font-semibold text-foreground mb-2">10. 사업자 정보/연락처</Text>
-          <Text className="text-sm text-foreground mb-1">서비스명: BOJ Helper</Text>
-          <Text className="text-sm text-foreground mb-1">사업자명: BOJ Helper Team</Text>
-          <Text className="text-sm text-foreground">이메일: support@boj-helper.app</Text>
+          <Text className="text-sm text-foreground mb-1">서비스명: SolveMate</Text>
+          <Text className="text-sm text-foreground mb-1">사업자명: SolveMate Team</Text>
+          <Text className="text-sm text-foreground">이메일: support@solvemate.app</Text>
         </View>
       </ScrollView>
     </ScreenContainer>

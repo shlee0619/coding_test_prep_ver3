@@ -14,6 +14,16 @@ function mockPreflightSuccess() {
   } as any);
 }
 
+function mockPreflightWithoutCsrf() {
+  vi.mocked(axios.get).mockResolvedValueOnce({
+    status: 200,
+    data: "<html><form></form></html>",
+    headers: {
+      "set-cookie": ["OnlineJudge=abc123; Path=/; HttpOnly"],
+    },
+  } as any);
+}
+
 describe("verifyBojCredentials", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -31,6 +41,21 @@ describe("verifyBojCredentials", () => {
     expect(result.ok).toBe(false);
     expect(result).toMatchObject({
       code: "INVALID_CREDENTIALS",
+    });
+  });
+
+  it("returns CHALLENGE_REQUIRED when BOJ redirects with error=1 and csrf is missing", async () => {
+    mockPreflightWithoutCsrf();
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      status: 302,
+      headers: { location: "/login?error=1&next=%2F&retry=1" },
+    } as any);
+
+    const result = await verifyBojCredentials("tourist", "correct-password");
+
+    expect(result.ok).toBe(false);
+    expect(result).toMatchObject({
+      code: "CHALLENGE_REQUIRED",
     });
   });
 
@@ -147,6 +172,19 @@ describe("verifyBojCredentials", () => {
     const result = await verifyBojCredentials("tourist", "correct-password");
 
     expect(result).toEqual({ ok: true });
+  });
+
+  it("returns NETWORK_ERROR when pre-flight fails and BOJ redirects with error=1", async () => {
+    vi.mocked(axios.get).mockRejectedValueOnce(new Error("login page down"));
+    vi.mocked(axios.post).mockResolvedValueOnce({
+      status: 302,
+      headers: { location: "/login?error=1&next=%2F&retry=1" },
+    } as any);
+
+    const result = await verifyBojCredentials("tourist", "correct-password");
+
+    expect(result.ok).toBe(false);
+    expect(result).toMatchObject({ code: "NETWORK_ERROR" });
   });
 
   it("proceeds without CSRF token when login page has no csrf_key input", async () => {

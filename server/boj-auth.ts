@@ -8,6 +8,7 @@ const BOJ_LOGIN_REFERER = "https://www.acmicpc.net/login?next=%2F";
 interface LoginPageContext {
   cookies: string;
   csrfToken: string | null;
+  cookieCount: number;
 }
 
 async function fetchLoginPageContext(): Promise<LoginPageContext> {
@@ -38,7 +39,7 @@ async function fetchLoginPageContext(): Promise<LoginPageContext> {
       null;
   }
 
-  return { cookies, csrfToken };
+  return { cookies, csrfToken, cookieCount: cookiePairs.length };
 }
 
 export type BojCredentialCheckResult =
@@ -65,10 +66,12 @@ export async function verifyBojCredentials(
 ): Promise<BojCredentialCheckResult> {
   try {
     // Pre-flight: 로그인 페이지에서 세션 쿠키와 CSRF 토큰을 수집
-    let context: LoginPageContext = { cookies: "", csrfToken: null };
+    let context: LoginPageContext = { cookies: "", csrfToken: null, cookieCount: 0 };
+    let preflightFailed = false;
     try {
       context = await fetchLoginPageContext();
     } catch (preflightError) {
+      preflightFailed = true;
       console.warn(
         "[BOJ Auth] Pre-flight GET failed, proceeding without session cookies:",
         preflightError,
@@ -105,11 +108,31 @@ export async function verifyBojCredentials(
 
     // 인증 실패 시 /login?error=1 로 리다이렉트
     if (response.status === 302 && location.includes("error=1")) {
+      // Pre-flight가 실패한 상태에서는 세션/CSRF 누락으로 동일 응답이 발생할 수 있어
+      // 자격증명 오입력으로 단정하지 않고 일시적 통신/인증 환경 오류로 분류한다.
+      if (preflightFailed) {
+        return {
+          ok: false,
+          code: "NETWORK_ERROR",
+          message: "백준 인증 환경이 일시적으로 불안정합니다. 잠시 후 다시 시도해주세요.",
+          detail: `Pre-flight failed; BOJ 응답: 302 → ${location}`,
+        };
+      }
+      // Pre-flight는 성공했지만 CSRF를 수집하지 못한 경우도 신뢰도 낮은 검증 결과다.
+      // 이 경우 INVALID_CREDENTIALS로 단정하지 않고 추가 검증 필요 상태로 분류한다.
+      if (!context.csrfToken) {
+        return {
+          ok: false,
+          code: "CHALLENGE_REQUIRED",
+          message: "백준 로그인 검증 정보가 불완전하여 자동 인증에 실패했습니다. 잠시 후 다시 시도해주세요.",
+          detail: `BOJ 응답: 302 → ${location} (preflight cookies=${context.cookieCount}, csrf=no)`,
+        };
+      }
       return {
         ok: false,
         code: "INVALID_CREDENTIALS",
         message: "백준 아이디 또는 비밀번호가 올바르지 않습니다.",
-        detail: `BOJ 응답: 302 → ${location}`,
+        detail: `BOJ 응답: 302 → ${location} (preflight cookies=${context.cookieCount}, csrf=${context.csrfToken ? "yes" : "no"})`,
       };
     }
 

@@ -81,7 +81,7 @@ pnpm release:gate -- --api https://<api-domain> --privacy https://<app-domain>/p
 
 ## 현재 차단 근거
 
-- `app.bojhelper.dev`, `api.bojhelper.dev` DNS resolve 실패(`ENOTFOUND`)
-- `nslookup app.bojhelper.dev` 결과: `NXDOMAIN` (2026-02-18 13:28:59 KST)
-- `nslookup api.bojhelper.dev` 결과: `NXDOMAIN` (2026-02-18 13:29:00 KST)
+- `app.solvemate.dev`, `api.solvemate.dev` DNS resolve 실패(`ENOTFOUND`)
+- `nslookup app.solvemate.dev` 결과: `NXDOMAIN` (2026-02-18 13:28:59 KST)
+- `nslookup api.solvemate.dev` 결과: `NXDOMAIN` (2026-02-18 13:29:00 KST)
 - `npx eas-cli whoami` 기준 로그인 미완료

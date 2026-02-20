@@ -12,6 +12,6 @@ function readPublicEnv(name: string): string | undefined {
 }
 
 export const PRIVACY_POLICY_URL =
-  readPublicEnv("EXPO_PUBLIC_PRIVACY_POLICY_URL") ?? "https://boj-helper.app/privacy";
+  readPublicEnv("EXPO_PUBLIC_PRIVACY_POLICY_URL") ?? "https://solvemate.app/privacy";
 export const TERMS_OF_SERVICE_URL =
-  readPublicEnv("EXPO_PUBLIC_TERMS_OF_SERVICE_URL") ?? "https://boj-helper.app/terms";
+  readPublicEnv("EXPO_PUBLIC_TERMS_OF_SERVICE_URL") ?? "https://solvemate.app/terms";

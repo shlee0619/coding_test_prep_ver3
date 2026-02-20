@@ -1,11 +1,11 @@
-# BOJ Helper 앱 분석 보고서
+# SolveMate 앱 분석 보고서
 
 > 작성일: 2026-01-26
 > 버전: 1.0.0 (수정본)
 
 ## 앱 개요
 
-BOJ Helper는 백준 온라인 저지 사용자를 위한 학습 대시보드 앱입니다. solved.ac API를 통해 풀이 데이터를 분석하고 맞춤형 문제 추천과 학습 목표 관리를 제공합니다.
+SolveMate는 백준 온라인 저지 사용자를 위한 학습 대시보드 앱입니다. solved.ac API를 통해 풀이 데이터를 분석하고 맞춤형 문제 추천과 학습 목표 관리를 제공합니다.
 
 **기술 스택**: React Native (Expo) + tRPC + Drizzle ORM + MySQL
 

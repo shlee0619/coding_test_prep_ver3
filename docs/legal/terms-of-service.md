@@ -1,13 +1,13 @@
-# BOJ Helper 이용약관
+# SolveMate 이용약관
 
 - 시행일: 2026-02-17
-- 서비스명: BOJ Helper
-- 사업자명: BOJ Helper Team
-- 문의: support@boj-helper.app
+- 서비스명: SolveMate
+- 사업자명: SolveMate Team
+- 문의: support@solvemate.app
 
 ## 1. 목적
 
-본 약관은 BOJ Helper가 제공하는 서비스 이용과 관련한 권리, 의무 및 책임사항을 규정합니다.
+본 약관은 SolveMate가 제공하는 서비스 이용과 관련한 권리, 의무 및 책임사항을 규정합니다.
 
 ## 2. 정의
 

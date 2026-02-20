@@ -17,11 +17,11 @@
 
 - 결과: **외부대기**
 - 실행:
-  - `curl -I --max-time 10 https://app.bojhelper.dev/privacy`
-  - `curl -I --max-time 10 https://app.bojhelper.dev/terms`
+  - `curl -I --max-time 10 https://app.solvemate.dev/privacy`
+  - `curl -I --max-time 10 https://app.solvemate.dev/terms`
 - 결과 상세:
-  - `Could not resolve host: app.bojhelper.dev`
-  - `nslookup app.bojhelper.dev` -> `NXDOMAIN`
+  - `Could not resolve host: app.solvemate.dev`
+  - `nslookup app.solvemate.dev` -> `NXDOMAIN`
 - 판단:
   - DNS 단계에서 미해결. HTTPS/200 검증 불가.
 
@@ -40,8 +40,8 @@
 
 - 결과: **완료**
 - 실행:
-  - `NODE_ENV=production ALLOWED_ORIGINS='https://app.bojhelper.dev' pnpm release:env -- --target api`
-  - `EXPO_PUBLIC_API_BASE_URL='https://api.bojhelper.dev' EAS_PROJECT_ID='11111111-1111-1111-1111-111111111111' EXPO_PUBLIC_PRIVACY_POLICY_URL='https://app.bojhelper.dev/privacy' EXPO_PUBLIC_TERMS_OF_SERVICE_URL='https://app.bojhelper.dev/terms' pnpm release:env -- --target preview,production`
+  - `NODE_ENV=production ALLOWED_ORIGINS='https://app.solvemate.dev' pnpm release:env -- --target api`
+  - `EXPO_PUBLIC_API_BASE_URL='https://api.solvemate.dev' EAS_PROJECT_ID='11111111-1111-1111-1111-111111111111' EXPO_PUBLIC_PRIVACY_POLICY_URL='https://app.solvemate.dev/privacy' EXPO_PUBLIC_TERMS_OF_SERVICE_URL='https://app.solvemate.dev/terms' pnpm release:env -- --target preview,production`
 - 결과:
   - `[release-env] OK (api)`
   - `[release-env] OK (preview, production)`
@@ -52,12 +52,12 @@
 
 - 결과: **외부대기**
 - 실행:
-  - `pnpm smoke:api https://api.bojhelper.dev`
-  - `pnpm release:gate -- --api https://api.bojhelper.dev --privacy https://app.bojhelper.dev/privacy --terms https://app.bojhelper.dev/terms`
+  - `pnpm smoke:api https://api.solvemate.dev`
+  - `pnpm release:gate -- --api https://api.solvemate.dev --privacy https://app.solvemate.dev/privacy --terms https://app.solvemate.dev/terms`
 - 결과 상세:
-  - `ENOTFOUND api.bojhelper.dev`
+  - `ENOTFOUND api.solvemate.dev`
   - `release-gate` fetch 실패
-  - `nslookup api.bojhelper.dev` -> `NXDOMAIN`
+  - `nslookup api.solvemate.dev` -> `NXDOMAIN`
 - 판단:
   - API/웹 도메인 DNS 미해결로 게이트 검증 불가.
 
@@ -126,4 +126,4 @@ pnpm build
 
 - 현재: **No-Go 유지**
 - 단일 핵심 블로커:
-  - 운영 도메인(`api.bojhelper.dev`, `app.bojhelper.dev`) DNS 미등록(NXDOMAIN)으로 외부 게이트 검증 불가
+  - 운영 도메인(`api.solvemate.dev`, `app.solvemate.dev`) DNS 미등록(NXDOMAIN)으로 외부 게이트 검증 불가

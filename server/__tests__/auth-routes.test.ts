@@ -57,6 +57,27 @@ type MockUser = {
   lastSignedIn: Date;
 };
 
+function makeSolvedAcProfile(overrides: Partial<Record<string, unknown>> = {}) {
+  return {
+    handle: "tourist",
+    bio: "",
+    solvedCount: 1500,
+    tier: 31,
+    rating: 3500,
+    ratingByProblemsSum: 0,
+    ratingByClass: 0,
+    ratingBySolvedCount: 0,
+    ratingByVoteCount: 0,
+    class: 0,
+    classDecoration: "none",
+    rivalCount: 0,
+    reverseRivalCount: 0,
+    maxStreak: 0,
+    rank: 0,
+    ...overrides,
+  } as any;
+}
+
 describe("Auth routes", () => {
   let server: Server;
   let baseUrl: string;
@@ -86,6 +107,69 @@ describe("Auth routes", () => {
       boj: true,
       dev: true,
     });
+  });
+
+  it("starts solved.ac profile challenge", async () => {
+    vi.mocked(solvedac.getUserProfile).mockResolvedValueOnce(
+      makeSolvedAcProfile({ handle: "tourist" }),
+    );
+
+    const response = await fetch(`${baseUrl}/api/auth/solvedac/challenge/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ handle: "tourist" }),
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.success).toBe(true);
+    expect(typeof body.challengeId).toBe("string");
+    expect(typeof body.token).toBe("string");
+  });
+
+  it("verifies solved.ac challenge and issues app session", async () => {
+    vi.mocked(solvedac.getUserProfile).mockResolvedValueOnce(
+      makeSolvedAcProfile({ handle: "tourist", bio: "" }),
+    );
+    const startResponse = await fetch(`${baseUrl}/api/auth/solvedac/challenge/start`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ handle: "tourist" }),
+    });
+    const startBody = await startResponse.json();
+    const challengeId = startBody.challengeId as string;
+    const token = startBody.token as string;
+
+    const now = new Date();
+    vi.mocked(solvedac.getUserProfile).mockResolvedValueOnce(
+      makeSolvedAcProfile({ handle: "tourist", bio: `verify: ${token}` }),
+    );
+    vi.mocked(db.upsertUser).mockResolvedValue(undefined);
+    vi.mocked(db.getUserByOpenId).mockResolvedValue({
+      id: 1,
+      openId: "boj:tourist",
+      name: "tourist",
+      email: null,
+      loginMethod: "boj",
+      role: "user",
+      createdAt: now,
+      updatedAt: now,
+      lastSignedIn: now,
+    } as any);
+    vi.mocked(db.getLinkedAccount).mockResolvedValueOnce(undefined);
+    vi.mocked(db.createLinkedAccount).mockResolvedValueOnce(1);
+    vi.mocked(sdk.createSessionToken).mockResolvedValueOnce("session-token-solvedac");
+
+    const verifyResponse = await fetch(`${baseUrl}/api/auth/solvedac/challenge/verify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ challengeId }),
+    });
+    const verifyBody = await verifyResponse.json();
+
+    expect(verifyResponse.status).toBe(200);
+    expect(verifyBody.success).toBe(true);
+    expect(verifyBody.app_session_id).toBe("session-token-solvedac");
   });
 
   it("rejects missing credentials", async () => {
@@ -185,25 +269,34 @@ describe("Auth routes", () => {
     expect(Array.isArray(body.warnings)).toBe(true);
   });
 
-  it("returns 503 when BOJ verification is temporarily unavailable", async () => {
-    vi.mocked(verifyBojCredentials).mockResolvedValueOnce({
-      ok: false,
-      code: "NETWORK_ERROR",
-      message: "network unstable",
-    });
+  it.each([
+    "CHALLENGE_REQUIRED",
+    "NETWORK_ERROR",
+    "UNEXPECTED_RESPONSE",
+  ] as const)(
+    "rejects login and never issues session when BOJ verification fails (%s)",
+    async (code) => {
+      vi.mocked(verifyBojCredentials).mockResolvedValueOnce({
+        ok: false,
+        code,
+        message: "verification failed",
+      });
 
-    const response = await fetch(`${baseUrl}/api/auth/boj/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ handle: "tourist", password: "pw" }),
-    });
-    const body = await response.json();
+      const response = await fetch(`${baseUrl}/api/auth/boj/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handle: "tourist", password: "pw" }),
+      });
+      const body = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(body.success).toBe(false);
-    expect(body.code).toBe("NETWORK_ERROR");
-    expect(sdk.createSessionToken).not.toHaveBeenCalled();
-  });
+      expect(response.status).toBe(403);
+      expect(body.success).toBe(false);
+      expect(body.code).toBe(code);
+      expect(sdk.createSessionToken).not.toHaveBeenCalled();
+      expect(db.upsertUser).not.toHaveBeenCalled();
+      expect(solvedac.getUserProfile).not.toHaveBeenCalled();
+    },
+  );
 
   it("logs in successfully and returns app session token", async () => {
     const now = new Date();
@@ -248,5 +341,23 @@ describe("Auth routes", () => {
       loginMethod: "boj",
     });
     expect(db.createLinkedAccount).toHaveBeenCalledTimes(1);
+  });
+
+  it("clears invalid session cookie on /api/auth/me and returns 401", async () => {
+    const error = Object.assign(new Error("Invalid session cookie"), {
+      statusCode: 403,
+    });
+    vi.mocked(sdk.authenticateRequest).mockRejectedValueOnce(error);
+
+    const response = await fetch(`${baseUrl}/api/auth/me`, {
+      headers: {
+        cookie: "app_session_id=stale-token",
+      },
+    });
+    const body = await response.json();
+
+    expect(response.status).toBe(401);
+    expect(body).toMatchObject({ error: "Not authenticated", user: null });
+    expect(response.headers.get("set-cookie") || "").toContain("app_session_id=");
   });
 });

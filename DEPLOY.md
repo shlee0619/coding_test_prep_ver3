@@ -1,4 +1,4 @@
-# BOJ Helper 배포 가이드
+# SolveMate 배포 가이드
 
 ## 1) 배포 아키텍처 (권장)
 

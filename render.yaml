@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: boj-helper-api
+    name: solvemate-api
     runtime: docker
     plan: starter
     dockerfilePath: ./Dockerfile.backend

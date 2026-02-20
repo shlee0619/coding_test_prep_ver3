@@ -1,4 +1,4 @@
-# BOJ Helper 백엔드 보완 보고서
+# SolveMate 백엔드 보완 보고서
 
 - 작성일: 2026-02-16
 - 대상: `/Users/shlee/Desktop/coding_test_prep_ver3` 백엔드 (`/server`, `/drizzle`)

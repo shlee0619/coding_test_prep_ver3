@@ -1,7 +1,7 @@
 # Login Fix — BOJ Pre-flight 세션 누락으로 인한 허위 인증 실패 수정
 
 ## 1. 문서 목적
-이 문서는 `BOJ Helper`에서 발생한 **"올바른 아이디/비밀번호임에도 인증 실패로 처리되는"** 버그의
+이 문서는 `SolveMate`에서 발생한 **"올바른 아이디/비밀번호임에도 인증 실패로 처리되는"** 버그의
 원인 분석, 수정 내역, 테스트 보강을 기록한다.
 
 - 기준 저장소: `/Users/shlee/Desktop/coding_test_prep_ver3`

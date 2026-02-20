@@ -1,4 +1,4 @@
-# BOJ Helper TODO
+# SolveMate TODO
 
 ## 인프라 및 설정
 - [x] 데이터베이스 스키마 설계 및 마이그레이션
